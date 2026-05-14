@@ -21,7 +21,7 @@
     } catch (e) {
       try {
         generator = await pipeline("text-generation", "LiquidAI/LFM2.5-1.2B-Instruct-ONNX", {
-          device: 'wasm',
+          device: 'auto',
           dtype: 'q4',
         }) as TextGenerationPipeline;
       } catch (e) {
