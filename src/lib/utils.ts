@@ -1,22 +1,15 @@
 import { pipeline, type TextGenerationPipeline, type ProgressCallback, env } from '@huggingface/transformers';
 
-export async function checkWebGPUSupport(): Promise<boolean> {
-  // 1. Check if the browser API exists
-  if (!navigator.gpu) return false;
-
+async function selectDevice(): Promise<string> {
   try {
-    // 2. Check if an adapter (physical GPU) is accessible
     const adapter = await navigator.gpu.requestAdapter();
-    if (!adapter) return false;
-
-    // 3. Optional: Configure Transformers.js to prioritize WebGPU
-    // This helps the 'auto' device selection be more aggressive
-    env.allowLocalModels = false; // Example config
-
-    return true;
+    if (adapter) {
+      return 'webgpu';
+    }
   } catch (e) {
-    return false;
+    console.warn(e);
   }
+  return 'auto';
 }
 
 export function isSafari(): boolean {
@@ -27,10 +20,10 @@ export function isSafari(): boolean {
 }
 
 export async function loadModel(progress_callback: undefined | ProgressCallback = undefined) {
-  let device = await checkWebGPUSupport() ? 'webgpu' : 'auto';
-  if (isSafari()) {
-    device = 'auto';
-  }
+  let device = await selectDevice();
+  //if (isSafari()) {
+  //  device = 'auto';
+  //}
   console.info('Selected device:', device);
 
   const model = "LiquidAI/LFM2-8B-A1B-ONNX";
@@ -41,4 +34,14 @@ export async function loadModel(progress_callback: undefined | ProgressCallback 
     dtype: 'q4',
     progress_callback,
   }) as TextGenerationPipeline;
+}
+
+// utils.js
+export function parseMarkdown(text: string) {
+  if (!text) return "";
+
+  return text
+    .replace(/\*\*(.*?)\*\*/g, "<b>$1</b>") // Bold: **text**
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")             // Italics: *text*
+    .replace(/\n/g, "<br />");                        // Newlines: \n
 }

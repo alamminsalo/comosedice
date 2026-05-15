@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { pipeline, TextStreamer, type TextGenerationPipeline } from '@huggingface/transformers';
-  import { loadModel } from './utils.ts';
+  import { loadModel, parseMarkdown } from './utils.ts';
 
   let isLoading = true;
   let progress = 0;
@@ -55,12 +55,14 @@
       { 
         role: "system", 
         content: `
-Act as a strict Spanish tutor. Analyze the provided Spanish text for any grammatical, spelling, or natural phrasing errors.
-If errors exist, correct them briefly and provide the polished Spanish version. Answer with a concise, natural paragraph in English.`
+Act as a Spanish tutor. See the provided Spanish text for any grammatical, spelling, or natural phrasing errors.
+Only suggest alternatives if a phrasing is clearly out of context.
+For any clear errors, correct them briefly and provide the polished Spanish version. Answer in concise and conversational, natural English.
+`
       },
       { 
         role: "user", 
-        content: `Evaluate this text: "${inputText}"` 
+        content: `Heres the text: "${inputText}"` 
       },
     ];
 
@@ -68,7 +70,6 @@ If errors exist, correct them briefly and provide the polished Spanish version. 
       // LFMs use chat templates for instructions
       const output = await model(messages, {
         max_new_tokens: 200,
-        do_sample: false,
         streamer,
       });
     } catch (e: any) {
@@ -107,7 +108,7 @@ If errors exist, correct them briefly and provide the polished Spanish version. 
 
       {#if outputText}
         <div class="text-4xl">
-          <p>{outputText}</p>
+          {@html parseMarkdown(outputText)}
         </div>
       {/if}
     {/if}
