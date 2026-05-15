@@ -1,9 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { pipeline, TextStreamer, type TextGenerationPipeline } from '@huggingface/transformers';
+  import { loadModel } from './utils.ts';
 
   let isLoading = true;
-  let generator: TextGenerationPipeline | null = null;
+  let model: TextGenerationPipeline | null = null;
   let streamer: TextStreamer | null = null;
   let isGenerating = false;
 
@@ -12,29 +13,19 @@
   let outputText = '';
   let errorText = '';
 
-  async function loadModel() {
+  async function init() {
     try {
-      generator = await pipeline("text-generation", "LiquidAI/LFM2.5-1.2B-Instruct-ONNX", {
-        device: 'webgpu',
-        dtype: 'q4',
-      }) as TextGenerationPipeline;
+      model = await loadModel();
     } catch (e) {
-      try {
-        generator = await pipeline("text-generation", "LiquidAI/LFM2.5-1.2B-Instruct-ONNX", {
-          device: 'auto',
-          dtype: 'q4',
-        }) as TextGenerationPipeline;
-      } catch (e) {
-        console.error(e);
-        errorText = 'Loading error. Please try again.';
-      }
+      console.error(e);
+      errorText = 'Loading error. Please try again.';
     } finally {
       isLoading = false;
     }
 
     // Streamer pushes text to buffer and buffer is drained one character at a time.
     // This creates a typewriter effect.
-    streamer = new TextStreamer(generator.tokenizer, {
+    streamer = new TextStreamer(model.tokenizer, {
       skip_prompt: true,
       callback_function: (text) => { 
         outputBuf += text;
@@ -49,7 +40,7 @@
   }
 
   const generateResponse = async () => {
-    if (!generator || !inputText.trim()) return;
+    if (!model || !inputText.trim()) return;
     
     isGenerating = true;
     outputText = '';
@@ -68,7 +59,7 @@
 
     try {
       // LFMs use chat templates for instructions
-      const output = await generator(messages, {
+      const output = await model(messages, {
         max_new_tokens: 200,
         do_sample: false,
         streamer,
@@ -81,7 +72,7 @@
   };
 
   onMount(async () => {
-    await loadModel();
+    await init();
   });
 </script>
 
