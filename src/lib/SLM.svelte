@@ -62,7 +62,7 @@ For any clear errors, correct them briefly and provide the polished Spanish vers
       },
       { 
         role: "user", 
-        content: `Heres the text: "${inputText}"` 
+        content: `Assess the following text:\n"${inputText}"` 
       },
     ];
 
@@ -84,14 +84,14 @@ For any clear errors, correct them briefly and provide the polished Spanish vers
   });
 </script>
 
-<div class="">
+<div class='mt-6'>
   {#if errorText}
     <div class="relative flex items-center justify-center text-2xl text-red-500">
       {errorText}
     </div>
   {:else}
     {#if isLoading}
-      <progress max="100" value={progress} class="w-full h-4 bg-white border border-white rounded-full overflow-hidden appearance-none
+      <progress max="100" value={progress} class="h-4 bg-white rounded-full overflow-hidden appearance-none
         [&::-webkit-progress-bar]:bg-white 
         [&::-webkit-progress-value]:bg-orange-600 
         [&::-moz-progress-bar]:bg-orange-600"/>
@@ -101,13 +101,13 @@ For any clear errors, correct them briefly and provide the polished Spanish vers
           bind:value={inputText}
           disabled={isGenerating}
           onkeydown={(e) => e.key === 'Enter' && generateResponse()}
-          class="w-full border-b-2 border-gray-200 bg-transparent py-4 text-5xl font-light tracking-tight transition-all duration-300 focus:border-orange-600 focus:outline-none disabled:opacity-50"
+          class="w-full border-b-2 border-gray-200 bg-transparent py-4 md:text-5xl text-3xl font-light tracking-tight transition-all duration-300 focus:border-orange-600 focus:outline-none disabled:opacity-50"
           placeholder="Escribe tu frase..."
           autofocus
         />
 
       {#if outputText}
-        <div class="text-4xl">
+        <div class="mt-6 text-3xl md:text-4xl">
           {@html parseMarkdown(outputText)}
         </div>
       {/if}

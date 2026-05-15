@@ -6,10 +6,8 @@
 </script>
 
 <div class="min-h-screen bg-gray-900 flex flex-col justify-center items-center p-6 text-white">
-  <h1 class="text-6xl font-black tracking-tighter text-white md:text-8xl">
+  <h1 class="text-5xl font-black tracking-tighter text-white md:text-7xl">
     ¿Cómo se <span class="text-orange-600">dice?</span>
   </h1>
-  <section class="mt-6">
-    <SLM/>
-  </section>
+  <SLM/>
 </div>
