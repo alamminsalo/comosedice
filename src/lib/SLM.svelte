@@ -4,6 +4,7 @@
   import { loadModel } from './utils.ts';
 
   let isLoading = true;
+  let progress = 0;
   let model: TextGenerationPipeline | null = null;
   let streamer: TextStreamer | null = null;
   let isGenerating = false;
@@ -15,7 +16,11 @@
 
   async function init() {
     try {
-      model = await loadModel();
+      model = await loadModel((e) => {
+        if (e.status == 'progress_total') {
+          progress = Math.trunc(e.progress);
+        }
+      });
     } catch (e) {
       console.error(e);
       errorText = 'Loading error. Please try again.';
@@ -83,9 +88,10 @@
     </div>
   {:else}
     {#if isLoading}
-      <div class="relative flex items-center justify-center text-2xl">
-        <span class="loader"/>
-      </div>
+      <progress max="100" value={progress} class="w-full h-4 bg-white border border-white rounded-full overflow-hidden appearance-none
+        [&::-webkit-progress-bar]:bg-white 
+        [&::-webkit-progress-value]:bg-orange-600 
+        [&::-moz-progress-bar]:bg-orange-600"/>
     {:else}
       <input 
           type="text"
@@ -105,6 +111,3 @@
     {/if}
   {/if}
 </div>
-
-<style>
-</style>

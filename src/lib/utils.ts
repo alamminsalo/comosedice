@@ -1,4 +1,4 @@
-import { pipeline, type TextGenerationPipeline, env } from '@huggingface/transformers';
+import { pipeline, type TextGenerationPipeline, type ProgressCallback, env } from '@huggingface/transformers';
 
 export async function checkWebGPUSupport(): Promise<boolean> {
   // 1. Check if the browser API exists
@@ -19,6 +19,21 @@ export async function checkWebGPUSupport(): Promise<boolean> {
   }
 }
 
+function isMobileDevice() {
+  // 1. Check for modern Client Hints (Chrome/Android support)
+  if (navigator.userAgentData) {
+    return navigator.userAgentData.mobile;
+  }
+
+  // 2. Check for Touch + Screen Size (Reliable fallback for iOS Safari)
+  const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  const isSmallScreen = window.matchMedia("(max-width: 768px)").matches;
+
+  // 3. Logic: If it has touch and a small screen, it's a phone.
+  // If it has touch and a large screen, it's likely an iPad (which also has RAM limits).
+  return hasTouch && (isSmallScreen || /iPad|iPhone|iPod/.test(navigator.platform));
+}
+
 export function isSafari(): boolean {
   const ua = navigator.userAgent;
   // Chrome/Edge/Brave include "Chrome" and "Safari". 
@@ -26,19 +41,19 @@ export function isSafari(): boolean {
   return ua.includes('Safari') && !ua.includes('Chrome') && !ua.includes('Chromium');
 }
 
-export async function loadModel(name: string = "LiquidAI/LFM2.5-1.2B-Instruct-ONNX") {
+export async function loadModel(progress_callback: undefined | ProgressCallback = undefined) {
   let device = await checkWebGPUSupport() ? 'webgpu' : 'auto';
-
-  // Additional check for safari because it reports webgpu capability
-  // and then fails to load it anyway.
   if (isSafari()) {
     device = 'auto';
   }
-
   console.info('Selected device:', device);
 
-  return await pipeline("text-generation", name, {
+  const model = isMobileDevice() ? 'LiquidAI/LFM2.5-350M-ONNX' : "LiquidAI/LFM2.5-1.2B-Instruct-ONNX";
+  console.info('Loading model:', model);
+
+  return await pipeline("text-generation", model, {
     device: device,
     dtype: 'q4',
+    progress_callback,
   }) as TextGenerationPipeline;
 }
