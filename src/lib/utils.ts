@@ -19,21 +19,6 @@ export async function checkWebGPUSupport(): Promise<boolean> {
   }
 }
 
-function isMobileDevice() {
-  // 1. Check for modern Client Hints (Chrome/Android support)
-  if (navigator.userAgentData) {
-    return navigator.userAgentData.mobile;
-  }
-
-  // 2. Check for Touch + Screen Size (Reliable fallback for iOS Safari)
-  const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  const isSmallScreen = window.matchMedia("(max-width: 768px)").matches;
-
-  // 3. Logic: If it has touch and a small screen, it's a phone.
-  // If it has touch and a large screen, it's likely an iPad (which also has RAM limits).
-  return hasTouch && (isSmallScreen || /iPad|iPhone|iPod/.test(navigator.platform));
-}
-
 export function isSafari(): boolean {
   const ua = navigator.userAgent;
   // Chrome/Edge/Brave include "Chrome" and "Safari". 
@@ -48,7 +33,7 @@ export async function loadModel(progress_callback: undefined | ProgressCallback 
   }
   console.info('Selected device:', device);
 
-  const model = isMobileDevice() ? 'LiquidAI/LFM2.5-350M-ONNX' : "LiquidAI/LFM2.5-1.2B-Instruct-ONNX";
+  const model = "LiquidAI/LFM2-8B-A1B-ONNX";
   console.info('Loading model:', model);
 
   return await pipeline("text-generation", model, {

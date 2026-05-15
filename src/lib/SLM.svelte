@@ -54,7 +54,9 @@
     const messages = [
       { 
         role: "system", 
-        content: "You are a spanish teacher evaluating student texts. Explain the given sentence. If there are mistakes, please let me know. Be concise and respond in english."
+        content: `
+Act as a strict Spanish tutor. Analyze the provided Spanish text for any grammatical, spelling, or natural phrasing errors.
+If errors exist, correct them briefly and provide the polished Spanish version. Answer with a concise, natural paragraph in English.`
       },
       { 
         role: "user", 
