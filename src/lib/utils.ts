@@ -12,18 +12,8 @@ async function selectDevice(): Promise<string> {
   return 'auto';
 }
 
-export function isSafari(): boolean {
-  const ua = navigator.userAgent;
-  // Chrome/Edge/Brave include "Chrome" and "Safari". 
-  // True Safari has "Safari" but NOT "Chrome".
-  return ua.includes('Safari') && !ua.includes('Chrome') && !ua.includes('Chromium');
-}
-
 export async function loadModel(progress_callback: undefined | ProgressCallback = undefined) {
   let device = await selectDevice();
-  //if (isSafari()) {
-  //  device = 'auto';
-  //}
   console.info('Selected device:', device);
 
   const model = "LiquidAI/LFM2-8B-A1B-ONNX";
